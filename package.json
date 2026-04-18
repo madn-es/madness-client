@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "start": "tsx src/index.tsx",
+    "dev": "node --watch --import tsx src/index.tsx"
   },
   "repository": {
     "type": "git",
@@ -19,9 +19,21 @@
   },
   "homepage": "https://github.com/madn-es/madness-client#readme",
   "description": "",
+  "type": "module",
   "dependencies": {
     "ink": "^7.0.1",
+    "ink-text-input": "^6.0.0",
+    "open": "^11.0.0",
     "react": "^19.2.5"
   },
-  "type": "module"
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/node": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "@babel/preset-react": "^7.28.5",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  }
 }
