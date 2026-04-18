@@ -1,20 +1,51 @@
-import { Text } from "ink";
+import { useEffect, useState } from "react";
+import { Text, Box } from "ink";
 
 // 여기서 아스키아트를 바꿔보세요
 const LOGO = `
-  ooo        ooooo                 .o8                                          
-\`88.       .888'                "888                                          
- 888b     d'888   .oooo.    .oooo888  ooo. .oo.    .ooooo.   .oooo.o  .oooo.o 
- 8 Y88. .P  888  \`P  )88b  d88' \`888  \`888P"Y88b  d88' \`88b d88(  "8 d88(  "8 
- 8  \`888'   888   .oP"888  888   888   888   888  888ooo888 \`"Y88b.  \`"Y88b.  
- 8    Y     888  d8(  888  888   888   888   888  888    .o o.  )88b o.  )88b 
-o8o        o888o \`Y888""8o \`Y8bod88P" o888o o888o \`Y8bod8P' 8""888P' 8""888P'
+ ██████   ██████               █████
+▒▒██████ ██████               ▒▒███
+ ▒███▒█████▒███   ██████    ███████  ████████    ██████   █████   █████
+ ▒███▒▒███ ▒███  ▒▒▒▒▒███  ███▒▒███ ▒▒███▒▒███  ███▒▒███ ███▒▒   ███▒▒
+ ▒███ ▒▒▒  ▒███   ███████ ▒███ ▒███  ▒███ ▒███ ▒███████ ▒▒█████ ▒▒█████
+ ▒███      ▒███  ███▒▒███ ▒███ ▒███  ▒███ ▒███ ▒███▒▒▒   ▒▒▒▒███ ▒▒▒▒███
+ █████     █████▒▒████████▒▒████████ ████ █████▒▒██████  ██████  ██████
+▒▒▒▒▒     ▒▒▒▒▒  ▒▒▒▒▒▒▒▒  ▒▒▒▒▒▒▒▒ ▒▒▒▒ ▒▒▒▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒▒
 `.trimStart();
 
+function hslToHex(h: number, s: number, l: number): string {
+  s /= 100;
+  l /= 100;
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const color = l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
 export default function Logo() {
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 80);
+    return () => clearInterval(id);
+  }, []);
+
+  const lines = LOGO.split('\n');
+
   return (
-    <Text color="cyan" bold>
-      {LOGO}
-    </Text>
+    <Box flexDirection="column">
+      {lines.map((line, y) => (
+        <Box key={y}>
+          {[...line].map((ch, x) => {
+            if (ch === ' ') return <Text key={x}> </Text>;
+            const hue = (x * 6 + y * 4 - tick * 8 + 360 * 10) % 360;
+            return <Text key={x} color={hslToHex(hue, 90, 60)} bold>{ch}</Text>;
+          })}
+        </Box>
+      ))}
+    </Box>
   );
 }
