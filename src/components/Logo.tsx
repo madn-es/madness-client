@@ -29,7 +29,7 @@ export default function Logo() {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 80);
+    const id = setInterval(() => setTick(t => (t + 1) % 45), 80);
     return () => clearInterval(id);
   }, []);
 
@@ -42,7 +42,7 @@ export default function Logo() {
           {[...line].map((ch, x) => {
             if (ch === ' ') return <Text key={x}> </Text>;
             const hue = (x * 6 + y * 4 - tick * 8 + 360 * 10) % 360;
-            return <Text key={x} color={hslToHex(hue, 90, 60)} bold>{ch}</Text>;
+            return <Text key={x} color={hslToHex(hue, 100, 55)}>{ch}</Text>;
           })}
         </Box>
       ))}
