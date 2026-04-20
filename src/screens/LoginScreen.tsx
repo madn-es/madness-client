@@ -5,11 +5,32 @@ import open from 'open';
 import { login } from '../api/auth.js';
 import Button from '../components/Button.js';
 import { useTerminalSize } from '../hooks/useTerminalSize.js';
-import Logo from '../components/Logo.js';
+import Logo, { type LogoSize } from '../components/Logo.js';
 
 type Field = 'email' | 'password' | 'submit' | 'signup' | 'google';
-
 const FIELDS: Field[] = ['email', 'password', 'submit', 'signup', 'google'];
+
+// 모드별 레이아웃 설정
+//   lg: columns >= 115  →  우측 38, 로고 lg
+//   md: columns >= 80   →  우측 28, 로고 md
+//   sm: columns >= 60   →  우측 24, 로고 sm
+//   stack: columns < 60 →  세로 스택, 로고 sm
+type Mode = 'lg' | 'md' | 'sm' | 'stack';
+
+function getMode(columns: number): Mode {
+  if (columns >= 115) return 'lg';
+  if (columns >= 80)  return 'md';
+  if (columns >= 60)  return 'sm';
+  return 'stack';
+}
+
+const RIGHT_WIDTH: Record<Mode, number> = {
+  lg: 48, md: 34, sm: 24, stack: 0,
+};
+
+const LOGO_SIZE: Record<Mode, LogoSize> = {
+  lg: 'lg', md: 'md', sm: 'sm', stack: 'stack',
+};
 
 interface Props {
   onLogin: (token: string) => void;
@@ -23,10 +44,11 @@ export default function LoginScreen({ onLogin }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // 100컬럼 이상이면 좌우 분할, 미만이면 세로 스택
-  const isWide = columns >= 100;
-  const rightWidth = 38;
+  const mode = getMode(columns);
+  const rightWidth = RIGHT_WIDTH[mode];
   const leftWidth = columns - rightWidth - 3;
+  const isStack = mode === 'stack' || mode === 'sm';
+  const formWidth = isStack ? Math.min(columns - 4, 34) : rightWidth;
 
   function submit() {
     if (!email || !password) {
@@ -62,10 +84,8 @@ export default function LoginScreen({ onLogin }: Props) {
     }
   });
 
-  const formWidth = isWide ? rightWidth : columns - 4;
-
   const form = (
-    <Box width={formWidth} flexDirection="column" justifyContent="center" paddingX={2} gap={1}>
+    <Box width={formWidth} flexDirection="column" justifyContent="center" paddingX={1} gap={1}>
       <Box flexDirection="column">
         <Text bold color="white">로그인</Text>
         <Text dimColor>계정에 접속하세요</Text>
@@ -99,9 +119,9 @@ export default function LoginScreen({ onLogin }: Props) {
       </Box>
 
       <Box flexDirection="column" gap={1}>
-        <Button label="로그인" focused={focus === 'submit'} width={formWidth - 4} />
-        <Button label="회원가입" focused={focus === 'signup'} width={formWidth - 4} />
-        <Button label="Google로 로그인" focused={focus === 'google'} width={formWidth - 4} />
+        <Button label="로그인" focused={focus === 'submit'} width={formWidth - 2} />
+        <Button label="회원가입" focused={focus === 'signup'} width={formWidth - 2} />
+        <Button label="Google로 로그인" focused={focus === 'google'} width={formWidth - 2} />
       </Box>
 
       <Box>
@@ -116,10 +136,10 @@ export default function LoginScreen({ onLogin }: Props) {
     </Box>
   );
 
-  if (!isWide) {
+  if (isStack) {
     return (
-      <Box flexDirection="column" alignItems="center" paddingY={1}>
-        <Logo />
+      <Box height={rows} flexDirection="column" alignItems="center" justifyContent="center" gap={1}>
+        <Logo size={LOGO_SIZE[mode]} />
         {form}
       </Box>
     );
@@ -128,7 +148,7 @@ export default function LoginScreen({ onLogin }: Props) {
   return (
     <Box height={rows}>
       <Box width={leftWidth} alignItems="center" justifyContent="center">
-        <Logo />
+        <Logo size={LOGO_SIZE[mode]} />
       </Box>
       <Box flexDirection="column" alignItems="center">
         <Text dimColor>{'│\n'.repeat(rows)}</Text>

@@ -1,17 +1,30 @@
 import { useEffect, useState } from "react";
 import { Text, Box } from "ink";
 
-// 여기서 아스키아트를 바꿔보세요
-const LOGO = `
- ██████   ██████               █████
-▒▒██████ ██████               ▒▒███
- ▒███▒█████▒███   ██████    ███████  ████████    ██████   █████   █████
- ▒███▒▒███ ▒███  ▒▒▒▒▒███  ███▒▒███ ▒▒███▒▒███  ███▒▒███ ███▒▒   ███▒▒
- ▒███ ▒▒▒  ▒███   ███████ ▒███ ▒███  ▒███ ▒███ ▒███████ ▒▒█████ ▒▒█████
- ▒███      ▒███  ███▒▒███ ▒███ ▒███  ▒███ ▒███ ▒███▒▒▒   ▒▒▒▒███ ▒▒▒▒███
- █████     █████▒▒████████▒▒████████ ████ █████▒▒██████  ██████  ██████
-▒▒▒▒▒     ▒▒▒▒▒  ▒▒▒▒▒▒▒▒  ▒▒▒▒▒▒▒▒ ▒▒▒▒ ▒▒▒▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒▒
-`.trimStart();
+// lg / md / sm 모두 같은 로고
+const LOGO = `\
+  __  __           _
+ |  \\/  | __ _  __| |_ __   ___  ___ ___
+ | |\\/| |/ _\` |/ _\` | '_ \\ / _ \\/ __/ __|
+ | |  | | (_| | (_| | | | |  __/\\__ \\__ \\
+ |_|  |_|\\__,_|\\__,_|_| |_|\\___||___/___/`;
+
+// 세로 스택일 때만 사용하는 작은 로고
+const LOGO_STACK = `\
+  __  __         _
+ |  \\/  |__ _ __| |_ _  ___ ______
+ | |\\/| / _\` / _\` | ' \\/ -_|_-<_-<
+ |_|  |_\\__,_\\__,_|_||_\\___/__/__/`;
+
+export type LogoSize = 'lg' | 'md' | 'sm' | 'stack';
+
+interface Props {
+  size?: LogoSize;
+}
+
+// 고정 hue 단색, lightness 만 파도치게
+const HUE = 195; // 시안 계열
+const SAT = 100;
 
 function hslToHex(h: number, s: number, l: number): string {
   s /= 100;
@@ -25,15 +38,16 @@ function hslToHex(h: number, s: number, l: number): string {
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-export default function Logo() {
+export default function Logo({ size = 'lg' }: Props) {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => setTick(t => (t + 1) % 45), 80);
+    const id = setInterval(() => setTick(t => (t + 1) % 100), 80);
     return () => clearInterval(id);
   }, []);
 
-  const lines = LOGO.split('\n');
+  const art = size === 'stack' ? LOGO_STACK : LOGO;
+  const lines = art.split('\n');
 
   return (
     <Box flexDirection="column">
@@ -41,8 +55,10 @@ export default function Logo() {
         <Box key={y}>
           {[...line].map((ch, x) => {
             if (ch === ' ') return <Text key={x}> </Text>;
-            const hue = (x * 6 + y * 4 - tick * 8 + 360 * 10) % 360;
-            return <Text key={x} color={hslToHex(hue, 100, 55)}>{ch}</Text>;
+            // lightness를 sin 파도로: 30~80 사이를 흐르게
+            const wave = Math.sin((x * 0.4 + y * 0.8 - tick * 0.4) );
+            const lightness = 30 + wave * 25 + 25;
+            return <Text key={x} color={hslToHex(HUE, SAT, lightness)}>{ch}</Text>;
           })}
         </Box>
       ))}
