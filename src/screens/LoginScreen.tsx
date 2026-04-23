@@ -6,15 +6,11 @@ import { login } from '../api/auth.js';
 import Button from '../components/Button.js';
 import { useTerminalSize } from '../hooks/useTerminalSize.js';
 import Logo, { type LogoSize } from '../components/Logo.js';
+import { useTheme, getAccent } from '../theme.js';
 
 type Field = 'email' | 'password' | 'submit' | 'signup' | 'google';
 const FIELDS: Field[] = ['email', 'password', 'submit', 'signup', 'google'];
 
-// 모드별 레이아웃 설정
-//   lg: columns >= 115  →  우측 38, 로고 lg
-//   md: columns >= 80   →  우측 28, 로고 md
-//   sm: columns >= 60   →  우측 24, 로고 sm
-//   stack: columns < 60 →  세로 스택, 로고 sm
 type Mode = 'lg' | 'md' | 'sm' | 'stack';
 
 function getMode(columns: number): Mode {
@@ -25,12 +21,15 @@ function getMode(columns: number): Mode {
 }
 
 const RIGHT_WIDTH: Record<Mode, number> = {
-  lg: 48, md: 34, sm: 24, stack: 0,
+  lg: 40, md: 34, sm: 24, stack: 0,
 };
 
 const LOGO_SIZE: Record<Mode, LogoSize> = {
   lg: 'lg', md: 'md', sm: 'sm', stack: 'stack',
 };
+
+// 컨텐츠(입력칸, 버튼) 최대 너비
+const CONTENT_MAX = 34;
 
 interface Props {
   onLogin: (token: string) => void;
@@ -38,6 +37,8 @@ interface Props {
 
 export default function LoginScreen({ onLogin }: Props) {
   const { columns, rows } = useTerminalSize();
+  const { theme } = useTheme();
+  const accent = getAccent(theme);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [focus, setFocus] = useState<Field>('email');
@@ -49,6 +50,8 @@ export default function LoginScreen({ onLogin }: Props) {
   const leftWidth = columns - rightWidth - 3;
   const isStack = mode === 'stack' || mode === 'sm';
   const formWidth = isStack ? Math.min(columns - 4, 34) : rightWidth;
+  // 컨텐츠는 폼 안에서 최대 28까지만, 가운데 정렬
+  const contentWidth = Math.min(formWidth - 4, CONTENT_MAX);
 
   function submit() {
     if (!email || !password) {
@@ -85,16 +88,16 @@ export default function LoginScreen({ onLogin }: Props) {
   });
 
   const form = (
-    <Box width={formWidth} flexDirection="column" justifyContent="center" paddingX={1} gap={1}>
-      <Box flexDirection="column">
+    <Box width={formWidth} flexDirection="column" justifyContent="center" alignItems="center" gap={1}>
+      <Box width={contentWidth} flexDirection="column">
         <Text bold color="white">로그인</Text>
         <Text dimColor>계정에 접속하세요</Text>
       </Box>
 
-      <Box flexDirection="column" gap={1}>
+      <Box width={contentWidth} flexDirection="column" gap={1}>
         <Box flexDirection="column">
-          <Text color={focus === 'email' ? 'cyan' : 'gray'}>이메일</Text>
-          <Box borderStyle="round" borderColor={focus === 'email' ? 'cyan' : 'gray'} paddingX={1}>
+          <Text color={focus === 'email' ? accent : 'gray'}>이메일</Text>
+          <Box borderStyle="round" borderColor={focus === 'email' ? accent : 'gray'} paddingX={1}>
             <TextInput
               value={email}
               onChange={setEmail}
@@ -105,8 +108,8 @@ export default function LoginScreen({ onLogin }: Props) {
         </Box>
 
         <Box flexDirection="column">
-          <Text color={focus === 'password' ? 'cyan' : 'gray'}>비밀번호</Text>
-          <Box borderStyle="round" borderColor={focus === 'password' ? 'cyan' : 'gray'} paddingX={1}>
+          <Text color={focus === 'password' ? accent : 'gray'}>비밀번호</Text>
+          <Box borderStyle="round" borderColor={focus === 'password' ? accent : 'gray'} paddingX={1}>
             <TextInput
               value={password}
               onChange={setPassword}
@@ -118,13 +121,13 @@ export default function LoginScreen({ onLogin }: Props) {
         </Box>
       </Box>
 
-      <Box flexDirection="column" gap={1}>
-        <Button label="로그인" focused={focus === 'submit'} width={formWidth - 2} />
-        <Button label="회원가입" focused={focus === 'signup'} width={formWidth - 2} />
-        <Button label="Google로 로그인" focused={focus === 'google'} width={formWidth - 2} />
+      <Box width={contentWidth} flexDirection="column" gap={1}>
+        <Button label="로그인" focused={focus === 'submit'} width={contentWidth} />
+        <Button label="회원가입" focused={focus === 'signup'} width={contentWidth} />
+        <Button label="Google로 로그인" focused={focus === 'google'} width={contentWidth} />
       </Box>
 
-      <Box>
+      <Box width={contentWidth}>
         {loading ? (
           <Text color="yellow">로그인 중...</Text>
         ) : error ? (

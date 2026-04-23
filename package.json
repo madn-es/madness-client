@@ -22,6 +22,8 @@
   "type": "module",
   "dependencies": {
     "ink": "^7.0.1",
+    "ink-big-text": "^2.0.0",
+    "ink-gradient": "^4.0.0",
     "ink-text-input": "^6.0.0",
     "open": "^11.0.0",
     "react": "^19.2.5"

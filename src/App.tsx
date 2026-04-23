@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import LoginScreen from './screens/LoginScreen.js';
+import { ThemeProvider } from './theme.js';
 
 type Screen = 'login' | 'feed';
 
@@ -12,10 +13,10 @@ export default function App() {
     setScreen('feed');
   }
 
-  if (screen === 'login') {
-    return <LoginScreen onLogin={handleLogin} />;
-  }
-
-  // TODO: 피드 화면
-  return null;
+  return (
+    <ThemeProvider>
+      {screen === 'login' && <LoginScreen onLogin={handleLogin} />}
+      {/* TODO: 피드 화면 */}
+    </ThemeProvider>
+  );
 }
