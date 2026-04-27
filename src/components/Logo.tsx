@@ -12,8 +12,8 @@ interface Props {
 // size → ink-big-text font 매핑
 const FONT: Record<LogoSize, "block" | "simpleBlock" | "simple" | "tiny"> = {
   lg: "block",
-  md: "simpleBlock",
-  sm: "simple",
+  md: "tiny",
+  sm: "tiny",
   stack: "tiny",
 };
 
@@ -22,12 +22,12 @@ export default function Logo({ size = "lg" }: Props) {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => setTick((t) => (t + 1) % 100), 120);
+    const id = setInterval(() => setTick((t) => (t + 1) % 100), 100);
     return () => clearInterval(id);
   }, []);
 
-  // 테마 색상 기반 그라디언트 (lightness wave)
-  const phase = tick * 0.15;
+  // 테마 색상 기반 그라디언트 (lightness wave) — 역방향
+  const phase = -tick * 0.25;
   const colors = [0, 1, 2, 3, 4].map((i) => {
     const l = 45 + Math.sin(phase + i * 0.8) * 25 + 15;
     return hslToHex(theme.hue, theme.saturation, l);

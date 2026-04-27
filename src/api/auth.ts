@@ -23,3 +23,22 @@ export async function login(email: string, password: string): Promise<LoginResul
 
   return res.json() as Promise<LoginResult>;
 }
+
+export async function signup(
+  email: string,
+  username: string,
+  password: string,
+): Promise<LoginResult> {
+  const res = await fetch(`${BASE_URL}/auth/signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, username, password }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error((body as any).message ?? `회원가입 실패 (${res.status})`);
+  }
+
+  return res.json() as Promise<LoginResult>;
+}

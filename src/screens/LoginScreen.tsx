@@ -4,6 +4,7 @@ import TextInput from 'ink-text-input';
 import open from 'open';
 import { login } from '../api/auth.js';
 import Button from '../components/Button.js';
+import LabeledBox from '../components/LabeledBox.js';
 import { useTerminalSize } from '../hooks/useTerminalSize.js';
 import Logo, { type LogoSize } from '../components/Logo.js';
 import { useTheme, getAccent } from '../theme.js';
@@ -12,7 +13,6 @@ type Field = 'email' | 'password' | 'submit' | 'signup' | 'google';
 const FIELDS: Field[] = ['email', 'password', 'submit', 'signup', 'google'];
 
 type Mode = 'lg' | 'md' | 'sm' | 'stack';
-
 function getMode(columns: number): Mode {
   if (columns >= 115) return 'lg';
   if (columns >= 80)  return 'md';
@@ -20,22 +20,16 @@ function getMode(columns: number): Mode {
   return 'stack';
 }
 
-const RIGHT_WIDTH: Record<Mode, number> = {
-  lg: 40, md: 34, sm: 24, stack: 0,
-};
-
-const LOGO_SIZE: Record<Mode, LogoSize> = {
-  lg: 'lg', md: 'md', sm: 'sm', stack: 'stack',
-};
-
-// 컨텐츠(입력칸, 버튼) 최대 너비
+const RIGHT_WIDTH: Record<Mode, number> = { lg: 40, md: 34, sm: 24, stack: 0 };
+const LOGO_SIZE: Record<Mode, LogoSize> = { lg: 'lg', md: 'md', sm: 'sm', stack: 'stack' };
 const CONTENT_MAX = 34;
 
 interface Props {
   onLogin: (token: string) => void;
+  onSignup: () => void;
 }
 
-export default function LoginScreen({ onLogin }: Props) {
+export default function LoginScreen({ onLogin, onSignup }: Props) {
   const { columns, rows } = useTerminalSize();
   const { theme } = useTheme();
   const accent = getAccent(theme);
@@ -50,7 +44,6 @@ export default function LoginScreen({ onLogin }: Props) {
   const leftWidth = columns - rightWidth - 3;
   const isStack = mode === 'stack' || mode === 'sm';
   const formWidth = isStack ? Math.min(columns - 4, 34) : rightWidth;
-  // 컨텐츠는 폼 안에서 최대 28까지만, 가운데 정렬
   const contentWidth = Math.min(formWidth - 4, CONTENT_MAX);
 
   function submit() {
@@ -82,7 +75,7 @@ export default function LoginScreen({ onLogin }: Props) {
     if (key.return) {
       if (focus === 'email' && email) { setFocus('password'); return; }
       if (focus === 'password' || focus === 'submit') { submit(); return; }
-      if (focus === 'signup') { setError('회원가입 — 준비 중'); return; }
+      if (focus === 'signup') { onSignup(); return; }
       if (focus === 'google') { open('https://google.com'); return; }
     }
   });
@@ -95,30 +88,34 @@ export default function LoginScreen({ onLogin }: Props) {
       </Box>
 
       <Box width={contentWidth} flexDirection="column" gap={1}>
-        <Box flexDirection="column">
-          <Text color={focus === 'email' ? accent : 'gray'}>이메일</Text>
-          <Box borderStyle="round" borderColor={focus === 'email' ? accent : 'gray'} paddingX={1}>
-            <TextInput
-              value={email}
-              onChange={setEmail}
-              focus={focus === 'email' && !loading}
-              placeholder="user@example.com"
-            />
-          </Box>
-        </Box>
+        <LabeledBox
+          label="이메일"
+          width={contentWidth}
+          borderColor={focus === 'email' ? accent : 'gray'}
+          labelColor={focus === 'email' ? accent : 'gray'}
+        >
+          <TextInput
+            value={email}
+            onChange={setEmail}
+            focus={focus === 'email' && !loading}
+            placeholder="user@example.com"
+          />
+        </LabeledBox>
 
-        <Box flexDirection="column">
-          <Text color={focus === 'password' ? accent : 'gray'}>비밀번호</Text>
-          <Box borderStyle="round" borderColor={focus === 'password' ? accent : 'gray'} paddingX={1}>
-            <TextInput
-              value={password}
-              onChange={setPassword}
-              focus={focus === 'password' && !loading}
-              mask="*"
-              placeholder="••••••••"
-            />
-          </Box>
-        </Box>
+        <LabeledBox
+          label="비밀번호"
+          width={contentWidth}
+          borderColor={focus === 'password' ? accent : 'gray'}
+          labelColor={focus === 'password' ? accent : 'gray'}
+        >
+          <TextInput
+            value={password}
+            onChange={setPassword}
+            focus={focus === 'password' && !loading}
+            mask="*"
+            placeholder="••••••••"
+          />
+        </LabeledBox>
       </Box>
 
       <Box width={contentWidth} flexDirection="column" gap={1}>
